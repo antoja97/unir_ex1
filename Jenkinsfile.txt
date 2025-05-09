@@ -5,6 +5,9 @@ pipeline {
         stage('Inicio del juego') {
             steps {
                 echo 'Preparando entorno inicial...'
+                sh 'whoami'
+                sh 'hostname'
+                echo "El espacio de trabajo es: ${env.WORKSPACE}"
             }
         }
 
@@ -12,25 +15,36 @@ pipeline {
             steps {
                 git url: 'https://github.com/antoja97/unir_ex1', branch: 'master'
                 echo 'Código descargado del repositorio.'
+                sh 'whoami'
+                sh 'hostname'
+                echo "El espacio de trabajo es: ${env.WORKSPACE}"
             }
         }
 
         stage('Explorar terreno') {
             steps {
                 sh 'ls -la'
+                sh 'whoami'
+                sh 'hostname'
                 echo "Exploración completa del directorio."
+                echo "El espacio de trabajo es: ${env.WORKSPACE}"
             }
         }
 
         stage('Dónde estoy') {
             steps {
                 echo "Estoy en: ${env.WORKSPACE}"
+                sh 'whoami'
+                sh 'hostname'
             }
         }
 
         stage('Construcción (simbólica)') {
             steps {
                 echo 'Simulación de build completada.'
+                sh 'whoami'
+                sh 'hostname'
+                echo "El espacio de trabajo es: ${env.WORKSPACE}"
             }
         }
     }
