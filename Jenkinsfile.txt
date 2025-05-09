@@ -5,47 +5,63 @@ pipeline {
         stage('Inicio del juego') {
             steps {
                 echo 'Preparando entorno inicial...'
-                sh 'whoami'
-                sh 'hostname'
-                echo "El espacio de trabajo es: ${env.WORKSPACE}"
             }
         }
 
         stage('Clonar el universo') {
             steps {
-                git url: 'https://github.com/antoja97/unir_ex1', branch: 'master'
+                git url: 'https://github.com/antoja97/unir_ex1', branch: 'develop'
                 echo 'Código descargado del repositorio.'
-                sh 'whoami'
-                sh 'hostname'
-                echo "El espacio de trabajo es: ${env.WORKSPACE}"
             }
         }
 
         stage('Explorar terreno') {
             steps {
                 sh 'ls -la'
-                sh 'whoami'
-                sh 'hostname'
                 echo "Exploración completa del directorio."
-                echo "El espacio de trabajo es: ${env.WORKSPACE}"
             }
         }
 
         stage('Dónde estoy') {
             steps {
                 echo "Estoy en: ${env.WORKSPACE}"
-                sh 'whoami'
-                sh 'hostname'
+                sh 'echo "Usuario que ejecuta: $(whoami)"'
+                sh 'echo "Hostname: $(hostname)"'
+            }
+        }
+
+        stage('Instalar dependencias') {
+            steps {
+                script {
+                    sh 'pip install -r requirements.txt'
+                }
+            }
+        }
+
+        stage('Ejecutar pruebas') {
+            steps {
+                script {
+                    sh 'pytest --maxfail=5 --disable-warnings -q'
+                }
             }
         }
 
         stage('Construcción (simbólica)') {
             steps {
                 echo 'Simulación de build completada.'
-                sh 'whoami'
-                sh 'hostname'
-                echo "El espacio de trabajo es: ${env.WORKSPACE}"
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline finalizado'
+        }
+        success {
+            echo 'El pipeline se ejecutó correctamente.'
+        }
+        failure {
+            echo 'El pipeline ha fallado.'
         }
     }
 }
