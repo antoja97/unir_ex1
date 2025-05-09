@@ -1,0 +1,22 @@
+java -jar wiremock-standalone-3.13.0.jar --port 9090 --root-dir "C:\wiremock"
+
+
+
+ANTES DE CUALQUIER PYTEST HAY QUE HACER EL SET PYTHONPATH=.    
+Y DESPUÉS SE LANZA UN PYTEST TEST\UNIT  POR EJEMPLO
+
+HAY QUE TENER LEVANTADOS EL DE FLASK Y WIREMOCK A LA VEZ PARA TEST
+
+
+1.10.55 lo dejo, comienzo de práctica
+
+
+
+- establecer lo del set pythonpath=.
+- probar un pytest test\unit
+- despues hacemos SET FLASK_APP=app\api.py y ya está el localhost esperando http://127.0.0.1:5000
+- despues en c:\wiremock ejecutamos el .jar desde cmd
+- vamos jenkins con bash java -jar jenkins.war
+- esta es la pw: 04dacde1e0814bd8aa04c814da25e2da
+To log in, use the username: "admin" and the administrator password you used to access the setup wizard.
+

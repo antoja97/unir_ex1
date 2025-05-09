@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Inicio del juego') {
+            steps {
+                echo 'Preparando entorno inicial...'
+            }
+        }
+
+        stage('Clonar el universo') {
+            steps {
+                git url: 'https://github.com/antoja97/unir_ex1', branch: 'master'
+                echo 'Código descargado del repositorio.'
+            }
+        }
+
+        stage('Explorar terreno') {
+            steps {
+                sh 'ls -la'
+                echo "Exploración completa del directorio."
+            }
+        }
+
+        stage('Dónde estoy') {
+            steps {
+                echo "Estoy en: ${env.WORKSPACE}"
+            }
+        }
+
+        stage('Construcción (simbólica)') {
+            steps {
+                echo 'Simulación de build completada.'
+            }
+        }
+    }
+}
