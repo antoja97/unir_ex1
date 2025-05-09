@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        PYTHONPATH = "${WORKSPACE}/helloworld-master"
+    }
+
     stages {
         stage('Inicio del juego') {
             steps {
@@ -10,39 +14,23 @@ pipeline {
 
         stage('Clonar el universo') {
             steps {
-                git url: 'https://github.com/antoja97/unir_ex1', branch: 'develop'
-                echo 'Código descargado del repositorio.'
+                echo 'Clonando el repositorio...'
+                git 'https://github.com/antoja97/unir_ex1'
             }
         }
 
         stage('Explorar terreno') {
             steps {
+                echo 'Explorando el directorio...'
                 sh 'ls -la'
-                echo "Exploración completa del directorio."
             }
         }
 
         stage('Dónde estoy') {
             steps {
-                echo "Estoy en: ${env.WORKSPACE}"
-                sh 'echo "Usuario que ejecuta: $(whoami)"'
-                sh 'echo "Hostname: $(hostname)"'
-            }
-        }
-
-        stage('Instalar dependencias') {
-            steps {
-                script {
-                    sh 'pip install -r requirements.txt'
-                }
-            }
-        }
-
-        stage('Ejecutar pruebas') {
-            steps {
-                script {
-                    sh 'pytest --maxfail=5 --disable-warnings -q'
-                }
+                echo "Estoy en: ${WORKSPACE}"
+                sh 'whoami'
+                sh 'hostname'
             }
         }
 
@@ -51,17 +39,33 @@ pipeline {
                 echo 'Simulación de build completada.'
             }
         }
+
+        stage('Ejecutar Tests Unitarios') {
+            steps {
+                echo 'Ejecutando pruebas unitarias...'
+                sh 'pytest helloworld-master/test/unit'
+            }
+        }
+
+        stage('Ejecutar Tests de Integración') {
+            steps {
+                echo 'Ejecutando pruebas de integración...'
+                sh 'pytest helloworld-master/test/rest'
+            }
+        }
     }
 
     post {
         always {
-            echo 'Pipeline finalizado'
+            echo 'Pipeline finalizado.'
         }
+
         success {
-            echo 'El pipeline se ejecutó correctamente.'
+            echo 'Pipeline ejecutado correctamente.'
         }
+
         failure {
-            echo 'El pipeline ha fallado.'
+            echo 'Hubo un error en la ejecución del pipeline.'
         }
     }
 }
