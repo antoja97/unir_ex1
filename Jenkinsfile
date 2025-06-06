@@ -49,13 +49,13 @@ pipeline {
                     def banditOutput = ''
                     def banditIssues = 0
                     try {
-                        banditOutput = bat(script: 'python -m bandit -r . -f json', returnStdout: true).trim()
+                        banditOutput = bat(script: 'python -m bandit -r .', returnStdout: true).trim()
                     } catch (err) {
                         banditOutput = err.getMessage()
                     }
                     if (banditOutput) {
-                        def json = readJSON text: banditOutput
-                        banditIssues = json.metrics._totals.total_issues ?: 0
+                        // Contar líneas que contengan "Issue:" como ejemplo básico para número de issues
+                        banditIssues = banditOutput.readLines().findAll { it.contains("Issue:") }.size()
                     }
                     echo "Bandit hallazgos: ${banditIssues}"
                     if (banditIssues >= 4) {
