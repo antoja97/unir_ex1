@@ -1,13 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        FLake8_CMD = "python -m flake8 ."
-        BANDIT_CMD = "python -m bandit -r . -f json"
-        COVERAGE_RUN = "python -m coverage run -m unittest discover"
-        COVERAGE_REPORT = "python -m coverage report -m"
-    }
-
     stages {
         stage('Get Code') {
             steps {
@@ -20,16 +13,21 @@ pipeline {
             steps {
                 echo 'Ejecutando análisis estático con flake8...'
                 script {
-                    def flake8Output = bat(script: "${FLake8_CMD}", returnStdout: true).trim()
-                    def issues = 0
-                    if (flake8Output) {
-                        issues = flake8Output.readLines().size()
+                    def flake8Output = ''
+                    def flake8Issues = 0
+                    try {
+                        flake8Output = bat(script: "python -m flake8 .", returnStdout: true).trim()
+                    } catch (err) {
+                        flake8Output = err.getMessage()
                     }
-                    echo "Flake8 hallazgos: ${issues}"
-                    if (issues >= 10) {
+                    if (flake8Output) {
+                        flake8Issues = flake8Output.readLines().size()
+                    }
+                    echo "Flake8 hallazgos: ${flake8Issues}"
+                    if (flake8Issues >= 10) {
                         currentBuild.result = 'FAILURE'
                         echo "Flake8: 10 o más hallazgos - build marcada como FAILURE"
-                    } else if (issues >= 8) {
+                    } else if (flake8Issues >= 8) {
                         if (currentBuild.result != 'FAILURE') {
                             currentBuild.result = 'UNSTABLE'
                         }
@@ -48,17 +46,22 @@ pipeline {
             steps {
                 echo 'Lanzando pruebas de seguridad con bandit...'
                 script {
-                    def banditJson = bat(script: "${BANDIT_CMD}", returnStdout: true).trim()
-                    def issues = 0
-                    if (banditJson) {
-                        def json = readJSON text: banditJson
-                        issues = json.metrics._totals.total_issues ?: 0
+                    def banditOutput = ''
+                    def banditIssues = 0
+                    try {
+                        banditOutput = bat(script: 'python -m bandit -r . -f json', returnStdout: true).trim()
+                    } catch (err) {
+                        banditOutput = err.getMessage()
                     }
-                    echo "Bandit hallazgos: ${issues}"
-                    if (issues >= 4) {
+                    if (banditOutput) {
+                        def json = readJSON text: banditOutput
+                        banditIssues = json.metrics._totals.total_issues ?: 0
+                    }
+                    echo "Bandit hallazgos: ${banditIssues}"
+                    if (banditIssues >= 4) {
                         currentBuild.result = 'FAILURE'
                         echo "Bandit: 4 o más hallazgos - build marcada como FAILURE"
-                    } else if (issues >= 2) {
+                    } else if (banditIssues >= 2) {
                         if (currentBuild.result != 'FAILURE') {
                             currentBuild.result = 'UNSTABLE'
                         }
@@ -77,13 +80,18 @@ pipeline {
             steps {
                 echo 'Ejecutando pruebas unitarias y reporte de cobertura...'
                 script {
-                    bat "${COVERAGE_RUN}"
-                    def coverageOutput = bat(script: "${COVERAGE_REPORT}", returnStdout: true).trim()
-                    echo coverageOutput
-
+                    def covRunOut = ''
+                    def covReportOut = ''
+                    try {
+                        covRunOut = bat(script: 'python -m coverage run -m unittest discover', returnStdout: true).trim()
+                        covReportOut = bat(script: 'python -m coverage report -m', returnStdout: true).trim()
+                    } catch (err) {
+                        echo "Error ejecutando cobertura: ${err}"
+                    }
+                    echo covReportOut
                     def lineCoverage = 0
                     def branchCoverage = 0
-                    coverageOutput.readLines().each { line ->
+                    covReportOut.readLines().each { line ->
                         if (line =~ /^TOTAL/) {
                             def parts = line.trim().split(/\s+/)
                             if (parts.length >= 5) {
@@ -92,9 +100,7 @@ pipeline {
                             }
                         }
                     }
-
                     echo "Cobertura líneas: ${lineCoverage}%, Cobertura ramas: ${branchCoverage}%"
-
                     if (lineCoverage < 85 || branchCoverage < 80) {
                         currentBuild.result = 'FAILURE'
                         echo "Cobertura insuficiente - build marcada como FAILURE"
