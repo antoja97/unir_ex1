@@ -12,14 +12,14 @@ pipeline {
         stage('Static') {
             steps {
                 echo 'Ejecutando análisis estático con flake8...'
-                bat 'flake8 .'
+                bat 'python -m flake8 .'
             }
         }
 
         stage('Security Test') {
             steps {
                 echo 'Lanzando pruebas de seguridad con bandit...'
-                bat 'bandit -r .'
+                bat 'python -m bandit -r .'
             }
         }
 
@@ -33,8 +33,8 @@ pipeline {
         stage('Coverage') {
             steps {
                 echo 'Generando reporte de cobertura con coverage...'
-                bat 'coverage run -m unittest discover'
-                bat 'coverage report -m'
+                bat 'python -m coverage run -m unittest discover'
+                bat 'python -m coverage report -m'
             }
         }
     }
