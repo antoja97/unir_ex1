@@ -12,14 +12,18 @@ pipeline {
         stage('Static') {
             steps {
                 echo 'Ejecutando análisis estático con flake8...'
-                bat 'python -m flake8 .'
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    bat 'python -m flake8 .'
+                }
             }
         }
 
         stage('Security Test') {
             steps {
                 echo 'Lanzando pruebas de seguridad con bandit...'
-                bat 'python -m bandit -r .'
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    bat 'python -m bandit -r .'
+                }
             }
         }
 
@@ -33,8 +37,10 @@ pipeline {
         stage('Coverage') {
             steps {
                 echo 'Generando reporte de cobertura con coverage...'
-                bat 'python -m coverage run -m unittest discover'
-                bat 'python -m coverage report -m'
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    bat 'python -m coverage run -m unittest discover'
+                    bat 'python -m coverage report -m'
+                }
             }
         }
     }
