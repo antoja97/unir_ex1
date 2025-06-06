@@ -31,11 +31,11 @@ pipeline {
             steps {
                 echo 'Ejecutando pruebas unitarias y reporte de cobertura...'
                 script {
-                    def testResult = bat(script: 'python -m unittest discover', returnStatus: true)
+                    def testResult = bat(script: 'python -m coverage run -m unittest discover', returnStatus: true)
                     def coverageResult = bat(script: 'python -m coverage report -m', returnStatus: true)
-
+    
                     echo "Cobertura líneas: 0%, Cobertura ramas: 0%"
-
+    
                     if (testResult != 0 || coverageResult != 0) {
                         currentBuild.result = 'FAILURE'
                         error('Cobertura insuficiente - build marcada como FAILURE')
