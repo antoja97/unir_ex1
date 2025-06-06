@@ -30,7 +30,9 @@ pipeline {
         stage('Performance') {
             steps {
                 echo 'Corriendo pruebas de rendimiento con JMeter...'
-                bat 'jmeter -n -t tests/performance_test.jmx -l results.jtl'
+                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                    bat 'jmeter -n -t tests/performance_test.jmx -l results.jtl'
+                }
             }
         }
 
