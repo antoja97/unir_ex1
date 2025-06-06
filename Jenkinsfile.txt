@@ -2,49 +2,39 @@ pipeline {
     agent any
 
     stages {
-        stage('Inicio del juego') {
-            steps {
-                echo 'Preparando entorno inicial...'
-                sh 'whoami'
-                sh 'hostname'
-                echo "El espacio de trabajo es: ${env.WORKSPACE}"
-            }
-        }
-
-        stage('Clonar el universo') {
+        stage('Get Code') {
             steps {
                 git url: 'https://github.com/antoja97/unir_ex1', branch: 'master'
-                echo 'Código descargado del repositorio.'
-                sh 'whoami'
-                sh 'hostname'
-                echo "El espacio de trabajo es: ${env.WORKSPACE}"
+                echo 'Código descargado, listo para seguir.'
             }
         }
 
-        stage('Explorar terreno') {
+        stage('Static') {
             steps {
-                sh 'ls -la'
-                sh 'whoami'
-                sh 'hostname'
-                echo "Exploración completa del directorio."
-                echo "El espacio de trabajo es: ${env.WORKSPACE}"
+                echo 'Ejecutando análisis estático con flake8...'
+                sh 'flake8 .'
             }
         }
 
-        stage('Dónde estoy') {
+        stage('Security Test') {
             steps {
-                echo "Estoy en: ${env.WORKSPACE}"
-                sh 'whoami'
-                sh 'hostname'
+                echo 'Lanzando pruebas de seguridad con bandit...'
+                sh 'bandit -r .'
             }
         }
 
-        stage('Construcción (simbólica)') {
+        stage('Performance') {
             steps {
-                echo 'Simulación de build completada.'
-                sh 'whoami'
-                sh 'hostname'
-                echo "El espacio de trabajo es: ${env.WORKSPACE}"
+                echo 'Corriendo pruebas de rendimiento con JMeter...'
+                sh 'jmeter -n -t tests/performance_test.jmx -l results.jtl'
+            }
+        }
+
+        stage('Coverage') {
+            steps {
+                echo 'Generando reporte de cobertura con coverage...'
+                sh 'coverage run -m unittest discover'
+                sh 'coverage report -m'
             }
         }
     }
